@@ -1,5 +1,8 @@
 {
   "http.port": 8090,
-  "db_name": "whiskies",
-  "connection_string": "mongodb://localhost:27017"
+  "url": "jdbc:mysql://localhost:3306/lrnr_dev_01?autoReconnect=true",
+  "driver_class": "com.mysql.jdbc.Driver",
+  "user": "vikranth",
+  "password": "vikranth",
+  "queryTimeout": 10000
 }
