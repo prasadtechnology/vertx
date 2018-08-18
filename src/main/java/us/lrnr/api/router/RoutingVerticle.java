@@ -48,7 +48,7 @@ public class RoutingVerticle extends AbstractVerticle {
 //		router.route().handler(BodyHandler.create());
 
 		// Bind "/" to our hello message - so we are still compatible.
-		router.route("/").handler(this::getCredentials);
+		router.route("/credentials").handler(this::getCredentials);
 	}
 
 	private  void getCredentials(RoutingContext routingContext) {
