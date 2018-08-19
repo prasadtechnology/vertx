@@ -36,6 +36,12 @@ public class LrnrDaoVerticle extends AbstractVerticle {
 			
 		});
 
+		vertx.eventBus().consumer(Types.DAO_GET_CREDENTIAL, message -> {
+			LOGGER.info("entered LrnrDaoVerticle : " + message.body());
+			CredentialService.getCredential(message, sqlClient);
+			
+		});
+		
 		startFuture.complete();
 	}
 }

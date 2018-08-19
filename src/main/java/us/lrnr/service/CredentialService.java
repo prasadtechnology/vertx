@@ -27,7 +27,7 @@ public class CredentialService {
 				SQLConnection connection = res.result();
 
 				logger.info("got the connection ======>");
-				String sql = "SELECT * from credentials";
+				String sql = "SELECT * from credentials where is_active = 1 order by lms_type";
 	
 				connection.query(sql, result -> {
 					
@@ -35,7 +35,57 @@ public class CredentialService {
 						
 						ResultSet resultSet = result.result();
 						logger.info("got the result set ======>");
-						String resultSetResponse = resultSet.toJson().toString();
+						String resultSetResponse = resultSet.getRows().toString();
+						connection.close();
+						
+						messageRes.put("status", Types.STATUS_OK);
+						messageRes.put("data", resultSetResponse);
+						
+						message.reply(messageRes);
+						
+					} else {
+						
+						connection.close();
+						
+						messageRes.put("status", Types.STATUS_SERVER_SIDE_ERROR);
+						messageRes.put("data", "something went wrong while executing the query....");
+						
+						logger.info("failed to execute the query ========>");
+						
+						message.reply(messageRes);
+					}
+				});
+
+			} else {
+				messageRes.put("status", Types.STATUS_SERVER_SIDE_ERROR);
+				messageRes.put("data", "un able to -get the connection ....");
+				message.reply(messageRes);
+			}
+		});
+		
+	}
+
+	 public static void getCredential(Message message,JDBCClient sqlClient){
+		
+	JsonObject reqJson = (JsonObject)message.body();
+	JsonObject messageRes = new JsonObject();
+		 
+		sqlClient.getConnection(res -> {
+			if (res.succeeded()) {
+
+				SQLConnection connection = res.result();
+
+				logger.info("got the connection ======>");
+				String sql = "SELECT * from credentials where id=:id ";
+				sql = sql.replaceAll(":id", reqJson.getString("id"));
+	
+				connection.query(sql, result -> {
+					
+					if (result.succeeded()) {
+						
+						ResultSet resultSet = result.result();
+						logger.info("got the result set ======>");
+						String resultSetResponse = resultSet.getRows().toString();
 						connection.close();
 						
 						messageRes.put("status", Types.STATUS_OK);

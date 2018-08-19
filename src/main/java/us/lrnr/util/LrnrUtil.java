@@ -28,4 +28,26 @@ public class LrnrUtil {
 		});
 	}
 
+	public static void getCredential(Vertx vertx,RoutingContext routingContext){
+
+		JsonObject req = new JsonObject();
+		req.put("id", routingContext.request().getParam("id"));
+		
+		vertx.eventBus().send(Types.DAO_GET_CREDENTIAL, req, daoResponse -> {
+			try{
+				JsonObject respJson = (JsonObject) daoResponse.result().body();
+				if (respJson.getInteger("status") == Types.STATUS_OK) {
+					ResponseUtil.sendResponse(routingContext, Types.STATUS_OK, respJson);
+				} else {
+					ResponseUtil.sendResponse(routingContext, Types.STATUS_SERVER_SIDE_ERROR, respJson);
+				}	
+			}catch(Exception e){
+				JsonObject obj = new JsonObject();
+				obj.put("status", Types.STATUS_OK);
+				obj.put("data", e.getMessage());
+				ResponseUtil.sendResponse(routingContext, Types.STATUS_SERVER_SIDE_ERROR, obj);
+			}
+			
+		});
+	}
 }

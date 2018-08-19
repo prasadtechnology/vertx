@@ -1,19 +1,23 @@
 package us.lrnr.api.router;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import us.lrnr.service.CredentialService;
 import us.lrnr.util.LrnrUtil;
@@ -28,7 +32,15 @@ public class RoutingVerticle extends AbstractVerticle {
 	public void start(Future<Void> future) {
 
 		Router router = Router.router(vertx);
-
+		Set<HttpMethod> methodSet = new HashSet<HttpMethod>();
+		methodSet.add(HttpMethod.GET);
+		methodSet.add(HttpMethod.POST);
+		methodSet.add(HttpMethod.PUT);
+		methodSet.add(HttpMethod.PATCH);
+		methodSet.add(HttpMethod.DELETE);
+		methodSet.add(HttpMethod.TRACE);
+		router.route().handler(CorsHandler.create("*").allowedMethods(methodSet).allowedHeader("content-type"));
+		
 		vertx.createHttpServer().requestHandler(router::accept).listen(config().getInteger("http.port", 8090),
 				result -> {
 					if (result.succeeded()) {
@@ -49,10 +61,15 @@ public class RoutingVerticle extends AbstractVerticle {
 
 		// Bind "/" to our hello message - so we are still compatible.
 		router.route("/credentials").handler(this::getCredentials);
+		router.route("/credentials/:id").handler(this::getCredential);
 	}
 
 	private  void getCredentials(RoutingContext routingContext) {
 		LrnrUtil.getCredentials(vertx, routingContext);
+	}
+	
+	private void getCredential(RoutingContext routingContext){
+		LrnrUtil.getCredential(vertx, routingContext);
 	}
 
 //	private void getAll(RoutingContext routingContext) {
